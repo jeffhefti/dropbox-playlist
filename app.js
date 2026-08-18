@@ -125,7 +125,16 @@ async function playTrackAt(index) {
 
     els.audio.src = link;
     els.trackTitle.textContent = stripExtension(track.name);
-    setMediaSessionMetadata({ title: stripExtension(track.name) });
+
+    // iOS reads embedded ID3 artwork from the audio file itself and can
+    // silently overwrite our Media Session artwork with it shortly after
+    // playback starts. Re-applying our metadata on these later events makes
+    // sure ours is the last write and actually sticks.
+    const applyArtwork = () => setMediaSessionMetadata({ title: stripExtension(track.name) });
+    applyArtwork();
+    els.audio.addEventListener('loadedmetadata', applyArtwork, { once: true });
+    els.audio.addEventListener('canplay', applyArtwork, { once: true });
+    els.audio.addEventListener('playing', applyArtwork, { once: true });
 
     await els.audio.play();
     setStatus(`Playing ${index + 1} of ${queue.length}.`);
