@@ -24,6 +24,14 @@
     <button id="connect-btn" hidden>Connect Dropbox</button>
     <button id="logout-btn" hidden>Disconnect</button>
 
+    <div id="folder-picker" hidden>
+      <label for="folder-input">Dropbox folder</label>
+      <div class="folder-row">
+        <input type="text" id="folder-input" placeholder="/Music/Playlist" autocapitalize="off" autocorrect="off" spellcheck="false" />
+        <button id="folder-save-btn" type="button">Load</button>
+      </div>
+    </div>
+
     <div id="player" hidden>
       <div id="track-title">No track selected</div>
       <audio id="audio" controls preload="metadata"></audio>

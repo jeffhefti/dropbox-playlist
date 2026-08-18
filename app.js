@@ -5,6 +5,9 @@ const els = {
   status: document.getElementById('status'),
   connectBtn: document.getElementById('connect-btn'),
   logoutBtn: document.getElementById('logout-btn'),
+  folderPicker: document.getElementById('folder-picker'),
+  folderInput: document.getElementById('folder-input'),
+  folderSaveBtn: document.getElementById('folder-save-btn'),
   player: document.getElementById('player'),
   trackTitle: document.getElementById('track-title'),
   audio: document.getElementById('audio'),
@@ -16,13 +19,36 @@ const els = {
 let queue = [];
 let currentIndex = -1;
 
+const FOLDER_STORAGE_KEY = 'dbxplaylist_folder_path';
+
 function setStatus(msg) {
   els.status.textContent = msg;
   console.log('[status]', msg);
 }
 
+// Each visitor points the app at their own Dropbox folder; only the first
+// visit (or anyone who hasn't changed it) falls back to the folder baked
+// into config.js.
+function getFolderPath() {
+  return localStorage.getItem(FOLDER_STORAGE_KEY) || CONFIG.FOLDER_PATH;
+}
+
+function setFolderPath(path) {
+  localStorage.setItem(FOLDER_STORAGE_KEY, path);
+}
+
+// Dropbox's API wants "" for the root and "/Foo/Bar" (no trailing slash)
+// for subfolders.
+function normalizeFolderPath(raw) {
+  let path = raw.trim();
+  if (path === '' || path === '/') return '';
+  if (!path.startsWith('/')) path = '/' + path;
+  if (path.length > 1 && path.endsWith('/')) path = path.slice(0, -1);
+  return path;
+}
+
 function orderStorageKey() {
-  return `dbxplaylist_order::${CONFIG.FOLDER_PATH}`;
+  return `dbxplaylist_order::${getFolderPath()}`;
 }
 
 function loadSavedOrder() {
@@ -152,14 +178,20 @@ function playPrev() {
 }
 
 async function loadPlaylist() {
+  const folderPath = getFolderPath();
+  els.player.hidden = true;
+  els.audio.pause();
+  queue = [];
+  currentIndex = -1;
+
   setStatus('Loading token…');
   const accessToken = await getValidAccessToken();
 
-  setStatus(`Listing "${CONFIG.FOLDER_PATH}"…`);
-  const files = await listAudioFiles(accessToken);
+  setStatus(`Listing "${folderPath || '/'}"…`);
+  const files = await listAudioFiles(accessToken, folderPath);
 
   if (files.length === 0) {
-    setStatus(`No audio files found in ${CONFIG.FOLDER_PATH}.`);
+    setStatus(`No audio files found in ${folderPath || '/'}.`);
     return;
   }
 
@@ -176,6 +208,7 @@ async function loadPlaylist() {
 function showLoggedOutUI() {
   els.connectBtn.hidden = false;
   els.logoutBtn.hidden = true;
+  els.folderPicker.hidden = true;
   els.player.hidden = true;
   setStatus('Not connected.');
 }
@@ -183,6 +216,8 @@ function showLoggedOutUI() {
 function showLoggedInUI() {
   els.connectBtn.hidden = true;
   els.logoutBtn.hidden = false;
+  els.folderPicker.hidden = false;
+  els.folderInput.value = getFolderPath();
 }
 
 async function main() {
@@ -202,6 +237,17 @@ async function main() {
   els.prevBtn.addEventListener('click', playPrev);
   els.nextBtn.addEventListener('click', playNext);
   els.audio.addEventListener('ended', playNext);
+
+  const applyFolderChange = () => {
+    const path = normalizeFolderPath(els.folderInput.value);
+    setFolderPath(path);
+    els.folderInput.value = path;
+    loadPlaylist().catch((err) => setStatus(`Error: ${err.message}`));
+  };
+  els.folderSaveBtn.addEventListener('click', applyFolderChange);
+  els.folderInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') applyFolderChange();
+  });
 
   try {
     const justLoggedIn = await handleAuthRedirect();

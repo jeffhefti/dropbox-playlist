@@ -66,6 +66,38 @@ button:active {
   border: 1px solid #333;
 }
 
+#folder-picker {
+  margin-top: 16px;
+}
+
+#folder-picker label {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.folder-row {
+  display: flex;
+  gap: 8px;
+}
+
+#folder-input {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.95rem;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #333;
+  background: var(--bg);
+  color: var(--text);
+}
+
+#folder-save-btn {
+  padding: 10px 16px;
+  font-size: 0.95rem;
+}
+
 #player {
   margin-top: 20px;
 }

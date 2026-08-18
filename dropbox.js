@@ -12,7 +12,16 @@ async function dbxFetch(endpoint, accessToken, body) {
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`Dropbox API error (${endpoint}): ${res.status} ${text}`);
+    let friendly = null;
+    try {
+      const parsed = JSON.parse(text);
+      if (parsed.error_summary && parsed.error_summary.startsWith('path/not_found')) {
+        friendly = `Folder not found in your Dropbox: "${body.path}". Check the spelling/capitalization and try again.`;
+      }
+    } catch {
+      // Body wasn't JSON; fall through to the generic error below.
+    }
+    throw new Error(friendly || `Dropbox API error (${endpoint}): ${res.status} ${text}`);
   }
 
   return res.json();
@@ -23,12 +32,12 @@ function isAudioFile(name) {
   return CONFIG.AUDIO_EXTENSIONS.includes(ext);
 }
 
-// Lists audio files (non-recursive) in CONFIG.FOLDER_PATH, handling
+// Lists audio files (non-recursive) in the given folder, handling
 // pagination. Returns entries sorted by name.
-async function listAudioFiles(accessToken) {
+async function listAudioFiles(accessToken, folderPath) {
   let entries = [];
   let data = await dbxFetch('files/list_folder', accessToken, {
-    path: CONFIG.FOLDER_PATH,
+    path: folderPath,
     recursive: false,
   });
   entries = entries.concat(data.entries);

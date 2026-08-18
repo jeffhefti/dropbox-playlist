@@ -8,7 +8,7 @@
 // serving an inconsistent mix of old/new shell files (e.g. new HTML paired
 // with stale JS) until every file happens to get re-cached.
 
-const CACHE_NAME = 'dbxplaylist-shell-v5';
+const CACHE_NAME = 'dbxplaylist-shell-v6';
 const SHELL_FILES = [
   './',
   'index.html',
