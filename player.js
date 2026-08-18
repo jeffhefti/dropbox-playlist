@@ -42,9 +42,24 @@ function setupMediaSession(audioEl, { onNext, onPrev } = {}) {
   });
 }
 
+// Shared cover art shown for every track (one image for the whole
+// playlist, not per-track). Sized per the Media Session API's recommended
+// artwork set so the OS can pick the best fit for lock screen / CarPlay /
+// notification.
+const PLAYLIST_ARTWORK = [96, 128, 192, 256, 384, 512].map((size) => ({
+  src: `icons/artwork-${size}.jpg`,
+  sizes: `${size}x${size}`,
+  type: 'image/jpeg',
+}));
+
 function setMediaSessionMetadata({ title, artist = 'Dropbox Playlist', album = '' }) {
   if (!('mediaSession' in navigator)) return;
-  navigator.mediaSession.metadata = new MediaMetadata({ title, artist, album });
+  navigator.mediaSession.metadata = new MediaMetadata({
+    title,
+    artist,
+    album,
+    artwork: PLAYLIST_ARTWORK,
+  });
 }
 
 function stripExtension(filename) {

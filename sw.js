@@ -8,7 +8,7 @@
 // serving an inconsistent mix of old/new shell files (e.g. new HTML paired
 // with stale JS) until every file happens to get re-cached.
 
-const CACHE_NAME = 'dbxplaylist-shell-v3';
+const CACHE_NAME = 'dbxplaylist-shell-v4';
 const SHELL_FILES = [
   './',
   'index.html',
@@ -21,6 +21,12 @@ const SHELL_FILES = [
   'manifest.json',
   'icons/icon-192.png',
   'icons/icon-512.png',
+  'icons/artwork-96.jpg',
+  'icons/artwork-128.jpg',
+  'icons/artwork-192.jpg',
+  'icons/artwork-256.jpg',
+  'icons/artwork-384.jpg',
+  'icons/artwork-512.jpg',
 ];
 
 self.addEventListener('install', (event) => {
