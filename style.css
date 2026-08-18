@@ -1,0 +1,81 @@
+:root {
+  color-scheme: dark;
+  --bg: #121212;
+  --surface: #1e1e1e;
+  --text: #f2f2f2;
+  --muted: #9a9a9a;
+  --accent: #2ea3ff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+main {
+  width: 100%;
+  max-width: 420px;
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 24px;
+}
+
+h1 {
+  font-size: 1.25rem;
+  margin: 0 0 16px;
+}
+
+#status {
+  color: var(--muted);
+  font-size: 0.9rem;
+  min-height: 1.2em;
+  margin-bottom: 16px;
+}
+
+button {
+  font-size: 1rem;
+  padding: 12px 20px;
+  border-radius: 999px;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+}
+
+button:active {
+  opacity: 0.8;
+}
+
+#logout-btn {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid #333;
+}
+
+#player {
+  margin-top: 20px;
+}
+
+#track-title {
+  font-weight: 600;
+  margin-bottom: 12px;
+  word-break: break-word;
+}
+
+audio {
+  width: 100%;
+}

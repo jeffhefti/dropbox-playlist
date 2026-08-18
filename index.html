@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Dropbox Playlist</title>
+
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#121212" />
+
+  <!-- iOS Home Screen install support -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Playlist" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main>
+    <h1>Dropbox Playlist</h1>
+    <p id="status">Loading…</p>
+
+    <button id="connect-btn" hidden>Connect Dropbox</button>
+    <button id="logout-btn" hidden>Disconnect</button>
+
+    <div id="player" hidden>
+      <div id="track-title"></div>
+      <audio id="audio" controls preload="metadata"></audio>
+    </div>
+  </main>
+
+  <script src="config.js"></script>
+  <script src="auth.js"></script>
+  <script src="dropbox.js"></script>
+  <script src="player.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
