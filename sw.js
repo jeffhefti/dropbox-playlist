@@ -2,8 +2,13 @@
 // installability and let the shell load offline. Deliberately does NOT
 // cache Dropbox API responses, temporary links, or audio streams — those
 // are short-lived/auth-scoped and must always hit the network.
+//
+// Shell files are served network-first (falling back to cache only when
+// offline), not cache-first: this app iterates often, and cache-first risks
+// serving an inconsistent mix of old/new shell files (e.g. new HTML paired
+// with stale JS) until every file happens to get re-cached.
 
-const CACHE_NAME = 'dbxplaylist-shell-v2';
+const CACHE_NAME = 'dbxplaylist-shell-v3';
 const SHELL_FILES = [
   './',
   'index.html',
@@ -45,13 +50,12 @@ self.addEventListener('fetch', (event) => {
   }
 
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      if (cached) return cached;
-      return fetch(event.request).then((res) => {
+    fetch(event.request)
+      .then((res) => {
         const copy = res.clone();
         caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
         return res;
-      });
-    })
+      })
+      .catch(() => caches.match(event.request))
   );
 });
