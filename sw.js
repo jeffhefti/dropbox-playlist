@@ -3,7 +3,7 @@
 // cache Dropbox API responses, temporary links, or audio streams — those
 // are short-lived/auth-scoped and must always hit the network.
 
-const CACHE_NAME = 'dbxplaylist-shell-v1';
+const CACHE_NAME = 'dbxplaylist-shell-v2';
 const SHELL_FILES = [
   './',
   'index.html',

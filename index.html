@@ -25,8 +25,13 @@
     <button id="logout-btn" hidden>Disconnect</button>
 
     <div id="player" hidden>
-      <div id="track-title"></div>
+      <div id="track-title">No track selected</div>
       <audio id="audio" controls preload="metadata"></audio>
+      <div class="transport">
+        <button id="prev-btn">⏮ Prev</button>
+        <button id="next-btn">Next ⏭</button>
+      </div>
+      <ol id="playlist"></ol>
     </div>
   </main>
 
