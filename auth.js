@@ -57,6 +57,10 @@ async function startDropboxAuth() {
     code_challenge_method: 'S256',
     redirect_uri: CONFIG.REDIRECT_URI,
     token_access_type: 'offline', // also returns a refresh_token
+    // Caps the issued token to read-only metadata + content, regardless of
+    // how many scopes are enabled in the app's console — the app only ever
+    // calls list_folder and get_temporary_link.
+    scope: 'files.metadata.read files.content.read',
   });
 
   window.location.href = `https://www.dropbox.com/oauth2/authorize?${params.toString()}`;
