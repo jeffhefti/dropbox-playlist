@@ -26,6 +26,14 @@ function setStatus(msg) {
   console.log('[status]', msg);
 }
 
+// There's no refresh token, so an expired session shows up as a thrown
+// error from getValidAccessToken(). When that happens, drop back to the
+// logged-out UI (Connect button) instead of leaving a stale "connected"
+// view the user can't do anything with.
+function backToLoginIfSessionExpired() {
+  if (!isLoggedIn()) showLoggedOutUI();
+}
+
 // Each visitor points the app at their own Dropbox folder; only the first
 // visit (or anyone who hasn't changed it) falls back to the folder baked
 // into config.js.
@@ -166,6 +174,7 @@ async function playTrackAt(index) {
     setStatus(`Playing ${index + 1} of ${queue.length}.`);
   } catch (err) {
     setStatus(`Couldn't play "${track.name}": ${err.message}`);
+    backToLoginIfSessionExpired();
   }
 }
 
@@ -242,7 +251,10 @@ async function main() {
     const path = normalizeFolderPath(els.folderInput.value);
     setFolderPath(path);
     els.folderInput.value = path;
-    loadPlaylist().catch((err) => setStatus(`Error: ${err.message}`));
+    loadPlaylist().catch((err) => {
+      setStatus(`Error: ${err.message}`);
+      backToLoginIfSessionExpired();
+    });
   };
   els.folderSaveBtn.addEventListener('click', applyFolderChange);
   els.folderInput.addEventListener('keydown', (e) => {
@@ -267,6 +279,7 @@ async function main() {
     await loadPlaylist();
   } catch (err) {
     setStatus(`Error: ${err.message}`);
+    backToLoginIfSessionExpired();
   }
 }
 

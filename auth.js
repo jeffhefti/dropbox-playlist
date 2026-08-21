@@ -56,7 +56,9 @@ async function startDropboxAuth() {
     code_challenge: challenge,
     code_challenge_method: 'S256',
     redirect_uri: CONFIG.REDIRECT_URI,
-    token_access_type: 'offline', // also returns a refresh_token
+    // No token_access_type: 'offline' — that would also issue a long-lived
+    // refresh token. Without it, the access token simply expires (~4hrs)
+    // and the user reconnects, which keeps the stored credential short-lived.
     // Caps the issued token to read-only metadata + content, regardless of
     // how many scopes are enabled in the app's console — the app only ever
     // calls list_folder and get_temporary_link.
@@ -109,7 +111,6 @@ async function handleAuthRedirect() {
   const data = await res.json();
   storeTokens({
     access_token: data.access_token,
-    refresh_token: data.refresh_token,
     expires_at: Date.now() + data.expires_in * 1000,
   });
 
@@ -121,50 +122,16 @@ async function handleAuthRedirect() {
   return true;
 }
 
-async function refreshAccessToken() {
-  const tokens = getStoredTokens();
-  if (!tokens || !tokens.refresh_token) {
-    clearTokens();
-    throw new Error('Not logged in.');
-  }
-
-  const body = new URLSearchParams({
-    grant_type: 'refresh_token',
-    refresh_token: tokens.refresh_token,
-    client_id: CONFIG.DROPBOX_CLIENT_ID,
-  });
-
-  const res = await fetch('https://api.dropboxapi.com/oauth2/token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: body.toString(),
-  });
-
-  if (!res.ok) {
-    const text = await res.text();
-    clearTokens();
-    throw new Error(`Token refresh failed: ${res.status} ${text}`);
-  }
-
-  const data = await res.json();
-  const updated = {
-    ...tokens,
-    access_token: data.access_token,
-    expires_at: Date.now() + data.expires_in * 1000,
-  };
-  storeTokens(updated);
-  return updated.access_token;
-}
-
-// Returns a currently-valid access token, refreshing it first if it's
-// expired or about to expire.
+// Returns the current access token, or throws if it's missing or expired.
+// There's no refresh token (no offline access requested), so an expired
+// token just means the user needs to reconnect.
 async function getValidAccessToken() {
   const tokens = getStoredTokens();
   if (!tokens) throw new Error('Not logged in.');
 
-  const bufferMs = 60 * 1000; // refresh a minute early
-  if (Date.now() > tokens.expires_at - bufferMs) {
-    return refreshAccessToken();
+  if (Date.now() > tokens.expires_at) {
+    clearTokens();
+    throw new Error('Session expired — please reconnect to Dropbox.');
   }
   return tokens.access_token;
 }
